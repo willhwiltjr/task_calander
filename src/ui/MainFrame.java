@@ -2,6 +2,8 @@ package ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import model.Event;
 
 public class MainFrame extends JFrame {
 
@@ -42,10 +44,22 @@ public class MainFrame extends JFrame {
 
         // === Future: Add ActionListeners ===
         // addEventBtn.addActionListener(e -> openAddEventDialog());
+        addEventBtn.addActionListener(this::actionPerformed);
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainFrame::new);
+    }
+
+    private void actionPerformed(ActionEvent e) {
+        AddEventDialog dialog = new AddEventDialog(this);
+        dialog.setVisible(true);
+
+        Event newEvent = dialog.getCreatedEvent();
+        if (newEvent != null) {
+            calendarPanel.addEvent(newEvent);
+        }
     }
 }
 
