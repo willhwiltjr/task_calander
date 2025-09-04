@@ -9,10 +9,15 @@ import java.util.List;
 
 public class CalendarPanel extends JPanel {
     private List<Event> events;
+    private static final int HOUR_HEIGHT = 60;  // taller = more space per hour
+    private static final int LEFT_MARGIN = 60;  // for time labels
+    private static final int EVENT_WIDTH = 200;
+
 
     public CalendarPanel() {
         this.events = new ArrayList<>();
-        setBackground(Color.WHITE);
+        setBackground(new Color(250, 250, 250));  // off-white
+
     }
 
     public void addEvent(Event event) {
@@ -30,43 +35,63 @@ public class CalendarPanel extends JPanel {
     }
 
     private void drawTimeGrid(Graphics g) {
-        g.setColor(Color.LIGHT_GRAY);
-        int hourHeight = 40;  // 40 pixels per hour
-        for (int i = 0; i < 24; i++) {
-            int y = i * hourHeight;
-            g.drawLine(0, y, getWidth(), y);
-            g.setColor(Color.DARK_GRAY);
-            g.drawString(String.format("%02d:00", i), 5, y + 12);
-            g.setColor(Color.LIGHT_GRAY);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(new Color(230, 230, 230));  // light gray lines
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
+
+        for (int hour = 0; hour < 24; hour++) {
+            int y = hour * HOUR_HEIGHT;
+            if (hour % 2 == 0) {
+                g.setColor(new Color(245, 245, 245));  // very light gray
+                g.fillRect(LEFT_MARGIN, y, getWidth() - LEFT_MARGIN, HOUR_HEIGHT);
+            }
+
+            // Draw background line
+            g2.drawLine(LEFT_MARGIN, y, getWidth(), y);
+
+            // Draw time label
+            String label = String.format("%02d:00", hour);
+            g2.setColor(Color.GRAY);
+            g2.drawString(label, 10, y + 15);
+            g2.setColor(new Color(230, 230, 230));  // reset color for next line
         }
     }
+
 
 
     private void drawEvents(Graphics g) {
-        int hourHeight = 40;
-        int x = 100;            // starting x for event box
-        int width = 300;        // fixed width for events
-
-        g.setColor(new Color(100, 150, 255, 180)); // semi-transparent blue
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         for (Event event : events) {
-            int startHour = event.getStartTime().getHour();
-            int startMinute = event.getStartTime().getMinute();
-            int endHour = event.getEndTime().getHour();
-            int endMinute = event.getEndTime().getMinute();
+            int startY = (int) (event.getStartTime().toSecondOfDay() / 60.0 * HOUR_HEIGHT / 60);
+            int endY = (int) (event.getEndTime().toSecondOfDay() / 60.0 * HOUR_HEIGHT / 60);
+            int height = endY - startY;
 
-            int yStart = (int) ((startHour * 60 + startMinute) * (hourHeight / 60.0));
-            int yEnd = (int) ((endHour * 60 + endMinute) * (hourHeight / 60.0));
-            int height = yEnd - yStart;
+            int x = LEFT_MARGIN + 10;
 
-            g.fillRoundRect(x, yStart, width, height, 10, 10);
-            g.setColor(Color.BLACK);
-            g.drawString(event.getTitle(), x + 10, yStart + 15);
-            g.drawString(event.getStartTime() + " - " + event.getEndTime(), x + 10, yStart + 30);
+            // Background box
+            g2.setColor(new Color(100, 180, 255, 180));  // light blue with transparency
+            g2.fillRoundRect(x, startY + 2, EVENT_WIDTH, height - 4, 12, 12);
 
-            g.setColor(new Color(100, 150, 255, 180)); // reset color for next box
+            // Border
+            g2.setColor(new Color(70, 130, 200));
+            g2.drawRoundRect(x, startY + 2, EVENT_WIDTH, height - 4, 12, 12);
+
+            // Text inside
+            g2.setColor(Color.BLACK);
+            g2.setFont(new Font("SansSerif", Font.BOLD, 13));
+            g2.drawString(event.getTitle(), x + 10, startY + 18);
+
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 11));
+            g2.drawString(event.getStartTime() + " - " + event.getEndTime(), x + 10, startY + 35);
+
+            if (!event.getDescription().isEmpty()) {
+                g2.drawString(event.getDescription(), x + 10, startY + 50);
+            }
         }
     }
+
 
 }
 

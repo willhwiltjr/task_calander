@@ -35,7 +35,8 @@ public class MainFrame extends JFrame {
 
         // Calendar display (hourly)
         calendarPanel = new CalendarPanel();
-
+        JScrollPane scrollPane = new JScrollPane(calendarPanel);
+        add(scrollPane, BorderLayout.CENTER);
         // Add both to frame
         add(buttonPanel, BorderLayout.WEST);
         add(calendarPanel, BorderLayout.CENTER);
