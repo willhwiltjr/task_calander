@@ -51,6 +51,8 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         // Calendar display (hourly)
         calendarPanel = new CalendarPanel();
         scrollPane = new JScrollPane(calendarPanel);
+        calendarPanel.setCalendarActionListener(this);
+
 
         //======event list panel====
         eventListModel = new DefaultListModel<>();
@@ -217,12 +219,19 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         Event newEvent = dialog.getCreatedEvent();
         if (newEvent != null) {
             calendarPanel.addEvent(newEvent);
+            scrollToEvent(newEvent);
         }
     }
 
     @Override
     public void onEdit(Event event) {
-        // TODO: Implement edit dialog, pass event to it, update after editing
+        AddEventDialog dialog = new AddEventDialog(this);
+        dialog.setVisible(true);
+        Event newEvent = dialog.getCreatedEvent();
+        if (newEvent != null) {
+            calendarPanel.removeEvent(event);
+            calendarPanel.addEvent(newEvent);
+        }
         System.out.println("Edit requested for: " + event.getTitle());
     }
 
@@ -236,6 +245,18 @@ public class MainFrame extends JFrame implements CalendarActionListener {
             calendarPanel.removeEvent(event); // implement this method to remove event & repaint
         }
     }
+
+    @Override
+    public void onEventSelected(Event event) {
+        if (event != null) {
+            System.out.println("Event selected: " + event.getTitle());
+            // Maybe show event details in a panel, enable edit/delete buttons, etc.
+        } else {
+            System.out.println("No event selected");
+            // Clear selection UI
+        }
+    }
+
 }
 
 

@@ -8,5 +8,7 @@ public interface CalendarActionListener {
     void onAdd();
     void onEdit(Event event);
     void onDelete(Event event);
+    void onEventSelected(Event event);
+
 }
 

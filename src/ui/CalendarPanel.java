@@ -19,8 +19,9 @@ public class CalendarPanel extends JPanel {
     private CalendarActionListener eventListener;
     private JPopupMenu contextMenu;
     private Event clickedEvent = null;
+    private Event selectedEvent;
 
-    public void setCalendarEventListener(CalendarActionListener listener) {
+    public void setCalendarActionListener(CalendarActionListener listener) {
         this.eventListener = listener;
     }
     private JPopupMenu createContextMenu(Event event) {
@@ -72,9 +73,31 @@ public class CalendarPanel extends JPanel {
 
 // Add mouse listener
         addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) { maybeShowPopup(e); }
-            public void mouseReleased(MouseEvent e) { maybeShowPopup(e); }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    Event event = getEventAt(e.getPoint());
+                    selectedEvent = event;          // <-- This line is missing in your code
+                    repaint();                      // <-- Trigger repaint to show highlight
+
+                    if (eventListener != null) {
+                        eventListener.onEventSelected(event);
+                    }
+                }
+                maybeShowPopup(e); // for right-click popup
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
         });
+
 
     }
 
@@ -158,6 +181,13 @@ public class CalendarPanel extends JPanel {
                 if (!event.getDescription().isEmpty()) {
                     g2.drawString(event.getDescription(), x + 6, startY + 48);
                 }
+
+                if (event.equals(selectedEvent)) {
+                    g2.setColor(new Color(255, 165, 0, 180)); // orange-ish highlight
+                    g2.setStroke(new BasicStroke(3));
+                    g2.drawRoundRect(x, startY + 2, columnWidth - 5, height - 4, 12, 12);
+                    g2.setStroke(new BasicStroke(1)); // reset stroke
+                }
             }
         }
     }
@@ -215,17 +245,30 @@ public class CalendarPanel extends JPanel {
 
 
     private Event getEventAt(Point point) {
-        for (Event event : events) {
-            int startY = event.getStartTime().getHour() * HOUR_HEIGHT;
-            int endY = event.getEndTime().getHour() * HOUR_HEIGHT;
+        List<List<Event>> overlappingGroups = groupOverlappingEvents(events);
 
-            Rectangle bounds = new Rectangle(LEFT_MARGIN, startY, getWidth() - LEFT_MARGIN, endY - startY);
-            if (bounds.contains(point)) {
-                return event;
+        for (List<Event> group : overlappingGroups) {
+            int groupSize = group.size();
+
+            for (int i = 0; i < groupSize; i++) {
+                Event event = group.get(i);
+
+                int startY = (int) (event.getStartTime().toSecondOfDay() / 60.0 * HOUR_HEIGHT / 60);
+                int endY = (int) (event.getEndTime().toSecondOfDay() / 60.0 * HOUR_HEIGHT / 60);
+                int height = endY - startY;
+
+                int columnWidth = EVENT_WIDTH / groupSize;
+                int x = LEFT_MARGIN + 10 + i * columnWidth;
+
+                Rectangle eventRect = new Rectangle(x, startY + 2, columnWidth - 5, height - 4);
+                if (eventRect.contains(point)) {
+                    return event;
+                }
             }
         }
         return null;
     }
+
 
 
 
