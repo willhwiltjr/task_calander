@@ -16,6 +16,19 @@ public class AddEventDialog extends JDialog {
 
     private Event createdEvent;
 
+    public AddEventDialog(JFrame parent, Event eventToEdit) {
+        this(parent);  // call existing constructor
+
+        if (eventToEdit != null) {
+            titleField.setText(eventToEdit.getTitle());
+            startTimeField.setText(eventToEdit.getStartTime().toString());
+            endTimeField.setText(eventToEdit.getEndTime().toString());
+            descriptionArea.setText(eventToEdit.getDescription());
+        }
+    }
+
+
+
     public AddEventDialog(JFrame parent) {
         super(parent, "Add New Event", true);
         setSize(400, 300);
