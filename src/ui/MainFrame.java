@@ -3,16 +3,24 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import model.Event;
+import model.ViewMode;
 
 public class MainFrame extends JFrame implements CalendarActionListener {
     private JScrollPane scrollPane;  // <-- Add this at the class level
     private CalendarPanel calendarPanel;
+    private WeeklyCalendarPanel weeklyCalendarPanel;
+    private MonthlyCalendarPanel monthlyCalendarPanel;
     private DefaultListModel<Event> eventListModel;
     private JList<Event> eventList;
     private JPopupMenu eventContextMenu;
+    private JButton dailyViewBtn;
+    private JButton weeklyViewBtn;
+    private JButton monthlyViewBtn;
+
 
 
 
@@ -30,21 +38,28 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         buttonPanel.setPreferredSize(new Dimension(200, 600));
 
         JButton addEventBtn = new JButton("Add Event");
-        JButton dailyViewBtn = new JButton("Daily View");
-        JButton monthlyViewBtn = new JButton("Monthly View");
+        this.dailyViewBtn = new JButton("Daily View");
+        dailyViewBtn.setVisible(false);
+        this.weeklyViewBtn = new JButton("Weekly View");
+        this.monthlyViewBtn = new JButton("Monthly View");
         JButton zoomInBtn = new JButton("Zoom In");
         JButton zoomOutBtn = new JButton("Zoom Out");
+
 
         // Add buttons to sidebar
         buttonPanel.add(addEventBtn);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(dailyViewBtn);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        buttonPanel.add(weeklyViewBtn);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(monthlyViewBtn);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(zoomInBtn);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(zoomOutBtn);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
 
 
 
@@ -52,6 +67,14 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         calendarPanel = new CalendarPanel();
         scrollPane = new JScrollPane(calendarPanel);
         calendarPanel.setCalendarActionListener(this);
+
+        // calander display weekly
+        weeklyCalendarPanel = new WeeklyCalendarPanel(calendarPanel.getEvents());
+        weeklyCalendarPanel.setCalendarActionListener(this);
+
+        //calander display monthly
+        monthlyCalendarPanel = new MonthlyCalendarPanel(calendarPanel.getEvents());
+        monthlyCalendarPanel.setCalendarActionListener(this);
 
 
         //======event list panel====
@@ -131,10 +154,25 @@ public class MainFrame extends JFrame implements CalendarActionListener {
                 dialog.setVisible(true);
                 Event updated = dialog.getCreatedEvent();
                 if (updated != null) {
-                    calendarPanel.updateEvent(selected, updated); // you'll implement this
+                    updateEventInAllViews(selected, updated);
                     eventListModel.set(eventList.getSelectedIndex(), updated);
                 }
             }
+        });
+
+        dailyViewBtn.addActionListener(e -> {
+            showDailyView();
+            setViewButtonsVisible(ViewMode.DAILY);
+        } );
+
+        weeklyViewBtn.addActionListener(e ->{
+            showWeeklyView();
+            setViewButtonsVisible(ViewMode.WEEKLY);
+        });
+
+        monthlyViewBtn.addActionListener(e -> {
+            showMonthlyView();
+            setViewButtonsVisible(ViewMode.MONTHLY);
         });
 
         deleteItem.addActionListener(e -> {
@@ -144,7 +182,7 @@ public class MainFrame extends JFrame implements CalendarActionListener {
                         "Are you sure you want to delete this event?",
                         "Confirm Delete", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    calendarPanel.removeEvent(selected);
+                    removeEventFromAllViews(selected);
                     eventListModel.removeElement(selected);
                 }
             }
@@ -166,8 +204,8 @@ public class MainFrame extends JFrame implements CalendarActionListener {
 
         Event newEvent = dialog.getCreatedEvent();
         if (newEvent != null) {
-            calendarPanel.addEvent(newEvent);
-            eventListModel.addElement(newEvent);   // Add to list panel
+            addEventToAllViews(newEvent);
+            eventListModel.addElement(newEvent); // Add to list panel
             scrollToEvent(newEvent);
         }
 
@@ -177,6 +215,12 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         int y = event.getStartTime().getHour() * calendarPanel.getHourHeight();
         animateScrollTo(y, 400);  // 400ms smooth scroll
     }
+
+    public void scrollToHour(LocalDateTime dateTime) {
+        int y = dateTime.getHour() * calendarPanel.getHourHeight();
+        animateScrollTo(y, 400);  // 400ms smooth scroll animation
+    }
+
 
     private void scrollToCurrentHour() {
         int currentHour = LocalTime.now().getHour();
@@ -216,46 +260,131 @@ public class MainFrame extends JFrame implements CalendarActionListener {
     public void onAdd() {
         AddEventDialog dialog = new AddEventDialog(this);
         dialog.setVisible(true);
+
         Event newEvent = dialog.getCreatedEvent();
         if (newEvent != null) {
-            calendarPanel.addEvent(newEvent);
+            addEventToAllViews(newEvent);
+            eventListModel.addElement(newEvent);
+            scrollToEvent(newEvent);
+        }
+    }
+
+    @Override
+    public void onAdd(LocalDateTime suggestedTime) {
+        AddEventDialog dialog = new AddEventDialog(this, suggestedTime);
+        dialog.setVisible(true);
+
+        Event newEvent = dialog.getCreatedEvent();
+        if (newEvent != null) {
+            addEventToAllViews(newEvent);
+            eventListModel.addElement(newEvent);
             scrollToEvent(newEvent);
         }
     }
 
     @Override
     public void onEdit(Event event) {
-        AddEventDialog dialog = new AddEventDialog(this);
+        AddEventDialog dialog = new AddEventDialog(this, event);
         dialog.setVisible(true);
-        Event newEvent = dialog.getCreatedEvent();
-        if (newEvent != null) {
-            calendarPanel.removeEvent(event);
-            calendarPanel.addEvent(newEvent);
+
+        Event updated = dialog.getCreatedEvent();
+        if (updated != null) {
+            updateEventInAllViews(event, updated);
+            updateEventInList(event, updated);
+            scrollToEvent(updated);
         }
-        System.out.println("Edit requested for: " + event.getTitle());
     }
 
     @Override
     public void onDelete(Event event) {
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete event: " + event.getTitle() + "?",
+                "Are you sure you want to delete this event?",
                 "Confirm Delete", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            calendarPanel.removeEvent(event); // implement this method to remove event & repaint
+            removeEventFromAllViews(event);
+            eventListModel.removeElement(event);
         }
     }
 
     @Override
     public void onEventSelected(Event event) {
         if (event != null) {
-            System.out.println("Event selected: " + event.getTitle());
-            // Maybe show event details in a panel, enable edit/delete buttons, etc.
-        } else {
-            System.out.println("No event selected");
-            // Clear selection UI
+            System.out.println("Selected: " + event.getTitle());
+            eventList.setSelectedValue(event, true);
+            scrollToEvent(event);
         }
     }
+
+    @Override
+    public void onDateSelected(LocalDateTime dateTime) {
+        scrollToHour(dateTime);  // optionally use this
+    }
+
+    //switch view to daily view hook up to the daily view button
+    private void showDailyView() {  scrollPane.setViewportView(calendarPanel);  }
+
+    //switch view to weekly view hook up to weekly view button
+    private void showWeeklyView() {
+        weeklyCalendarPanel.setEvents(calendarPanel.getEvents());
+        scrollPane.setViewportView(weeklyCalendarPanel);
+    }
+
+    //switch view to monthly view hook up to monthly view button
+    private void showMonthlyView() {
+        monthlyCalendarPanel.setEvents(calendarPanel.getEvents());
+        scrollPane.setViewportView(monthlyCalendarPanel);
+    }
+
+    private void addEventToAllViews(Event event) {
+        calendarPanel.addEvent(event);
+        weeklyCalendarPanel.setEvents(calendarPanel.getEvents());
+        monthlyCalendarPanel.setEvents(calendarPanel.getEvents());
+    }
+
+    private void updateEventInAllViews(Event oldEvent, Event newEvent) {
+        calendarPanel.removeEvent(oldEvent);
+        calendarPanel.addEvent(newEvent);
+        weeklyCalendarPanel.setEvents(calendarPanel.getEvents());
+        monthlyCalendarPanel.setEvents(calendarPanel.getEvents());
+    }
+
+    private void updateEventInList(Event oldEvent, Event newEvent) {
+        int index = eventListModel.indexOf(oldEvent);
+        if (index >= 0) {
+            eventListModel.set(index, newEvent);
+        }
+    }
+
+
+    private void removeEventFromAllViews(Event event) {
+        calendarPanel.removeEvent(event);
+        weeklyCalendarPanel.setEvents(calendarPanel.getEvents());
+        monthlyCalendarPanel.setEvents(calendarPanel.getEvents());
+    }
+
+    private void setViewButtonsVisible(ViewMode mode)
+    {
+        switch (mode) {
+            case DAILY -> {
+                dailyViewBtn.setVisible(false);
+                weeklyViewBtn.setVisible(true);
+                monthlyViewBtn.setVisible(true);
+            }
+            case WEEKLY -> {
+                dailyViewBtn.setVisible(true);
+                weeklyViewBtn.setVisible(false);
+                monthlyViewBtn.setVisible(true);
+            }
+            case MONTHLY -> {
+                dailyViewBtn.setVisible(true);
+                weeklyViewBtn.setVisible(true);
+                monthlyViewBtn.setVisible(false);
+            }
+        }
+    }
+
+
 
 }
 

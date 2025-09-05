@@ -269,6 +269,8 @@ public class CalendarPanel extends JPanel {
         return null;
     }
 
+    public List<Event> getEvents() {  return this.events;  }
+
 
 
 
