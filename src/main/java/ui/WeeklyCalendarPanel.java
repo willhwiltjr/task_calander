@@ -1,19 +1,19 @@
 package ui;
 
-import model.Event;
+import model.LocalEvent;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 public class WeeklyCalendarPanel extends JPanel {
-    private List<Event> events;
+    private List<LocalEvent> localEvents;
     private CalendarActionListener listener;
 
     public void setCalendarActionListener(CalendarActionListener listener) {  this.listener = listener;  }
 
-    public WeeklyCalendarPanel(List<Event> events) {
-        this.events = events;
+    public WeeklyCalendarPanel(List<LocalEvent> localEvents) {
+        this.localEvents = localEvents;
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(800, 600)); // Temporary size
     }
@@ -48,19 +48,19 @@ public class WeeklyCalendarPanel extends JPanel {
             g2.drawString(dayNames[i], x + 10, 20);
 
             // Draw event blocks
-            if (events != null) {
+            if (localEvents != null) {
                 int yOffset = headerHeight + verticalPadding;
-                for (Event event : events) {
-                    if (event.getDayOfWeek().getValue() % 7 == i) {
+                for (LocalEvent localEvent : localEvents) {
+                    if (localEvent.getDayOfWeek().getValue() % 7 == i) {
                         g2.setColor(new Color(100, 180, 255, 180));
                         g2.fillRoundRect(x + 10, yOffset, dayColumnWidth - 20, eventHeight, 10, 10);
 
                         g2.setColor(Color.BLACK);
                         g2.setFont(new Font("SansSerif", Font.BOLD, 12));
-                        g2.drawString(event.getTitle(), x + 16, yOffset + 16);
+                        g2.drawString(localEvent.getTitle(), x + 16, yOffset + 16);
 
                         g2.setFont(new Font("SansSerif", Font.PLAIN, 11));
-                        g2.drawString(event.getStartDateTime().toLocalTime().toString(), x + 16, yOffset + 32);
+                        g2.drawString(localEvent.getStartDateTime().toLocalTime().toString(), x + 16, yOffset + 32);
 
                         yOffset += eventHeight + verticalPadding;
                     }
@@ -74,8 +74,8 @@ public class WeeklyCalendarPanel extends JPanel {
     }
 
 
-    public void setEvents(List<Event> events) {
-        this.events = events;
+    public void setEvents(List<LocalEvent> localEvents) {
+        this.localEvents = localEvents;
         repaint();
     }
 }

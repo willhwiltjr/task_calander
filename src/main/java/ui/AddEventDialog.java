@@ -1,7 +1,7 @@
 package ui;
 
 import model.DateTimePickerUtil;
-import model.Event;
+import model.LocalEvent;
 import model.EventValidator;
 
 import javax.swing.*;
@@ -17,7 +17,7 @@ public class AddEventDialog extends JDialog {
     private JButton saveButton;
     private JButton cancelButton;
 
-    private Event createdEvent;
+    private LocalEvent createdEvent;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public AddEventDialog(JFrame parent) {
@@ -109,7 +109,7 @@ public class AddEventDialog extends JDialog {
                     throw new IllegalArgumentException("Start time must be before end time.");
                 }
 
-                createdEvent = new Event(title, start, end, desc);
+                createdEvent = new LocalEvent(title, start, end, desc);
                 dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
@@ -118,17 +118,17 @@ public class AddEventDialog extends JDialog {
     }
 
     // Optional: For editing existing event
-    public AddEventDialog(JFrame parent, Event eventToEdit) {
-        this(parent, eventToEdit != null ? eventToEdit.getStartDateTime() : null);
-        if (eventToEdit != null) {
-            titleField.setText(eventToEdit.getTitle());
-            startDateTimeField.setText(eventToEdit.getStartDateTime().format(FORMATTER));
-            endDateTimeField.setText(eventToEdit.getEndDateTime().format(FORMATTER));
-            descriptionArea.setText(eventToEdit.getDescription());
+    public AddEventDialog(JFrame parent, LocalEvent localEventToEdit) {
+        this(parent, localEventToEdit != null ? localEventToEdit.getStartDateTime() : null);
+        if (localEventToEdit != null) {
+            titleField.setText(localEventToEdit.getTitle());
+            startDateTimeField.setText(localEventToEdit.getStartDateTime().format(FORMATTER));
+            endDateTimeField.setText(localEventToEdit.getEndDateTime().format(FORMATTER));
+            descriptionArea.setText(localEventToEdit.getDescription());
         }
     }
 
-    public Event getCreatedEvent() {
+    public LocalEvent getCreatedEvent() {
         return createdEvent;
     }
 

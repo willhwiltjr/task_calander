@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import model.Event;
+import model.LocalEvent;
 import model.ViewMode;
 
 public class MainFrame extends JFrame implements CalendarActionListener {
@@ -14,8 +14,8 @@ public class MainFrame extends JFrame implements CalendarActionListener {
     private CalendarPanel calendarPanel;
     private WeeklyCalendarPanel weeklyCalendarPanel;
     private MonthlyCalendarPanel monthlyCalendarPanel;
-    private DefaultListModel<Event> eventListModel;
-    private JList<Event> eventList;
+    private DefaultListModel<LocalEvent> eventListModel;
+    private JList<LocalEvent> eventList;
     private JPopupMenu eventContextMenu;
     private JButton dailyViewBtn;
     private JButton weeklyViewBtn;
@@ -101,7 +101,7 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         // Add listener to scroll on selection
         eventList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                Event selected = eventList.getSelectedValue();
+                LocalEvent selected = eventList.getSelectedValue();
                 if (selected != null) {
                     scrollToEvent(selected);
                 }
@@ -148,11 +148,11 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         });
 
         editItem.addActionListener(e -> {
-            Event selected = eventList.getSelectedValue();
+            LocalEvent selected = eventList.getSelectedValue();
             if (selected != null) {
                 AddEventDialog dialog = new AddEventDialog(this, selected);  // you’ll need to support this overload
                 dialog.setVisible(true);
-                Event updated = dialog.getCreatedEvent();
+                LocalEvent updated = dialog.getCreatedEvent();
                 if (updated != null) {
                     updateEventInAllViews(selected, updated);
                     eventListModel.set(eventList.getSelectedIndex(), updated);
@@ -176,7 +176,7 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         });
 
         deleteItem.addActionListener(e -> {
-            Event selected = eventList.getSelectedValue();
+            LocalEvent selected = eventList.getSelectedValue();
             if (selected != null) {
                 int confirm = JOptionPane.showConfirmDialog(this,
                         "Are you sure you want to delete this event?",
@@ -202,17 +202,17 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         AddEventDialog dialog = new AddEventDialog(this);
         dialog.setVisible(true);
 
-        Event newEvent = dialog.getCreatedEvent();
-        if (newEvent != null) {
-            addEventToAllViews(newEvent);
-            eventListModel.addElement(newEvent); // Add to list panel
-            scrollToEvent(newEvent);
+        LocalEvent newLocalEvent = dialog.getCreatedEvent();
+        if (newLocalEvent != null) {
+            addEventToAllViews(newLocalEvent);
+            eventListModel.addElement(newLocalEvent); // Add to list panel
+            scrollToEvent(newLocalEvent);
         }
 
     }
 
-    public void scrollToEvent(Event event) {
-        int y = event.getStartTime().getHour() * calendarPanel.getHourHeight();
+    public void scrollToEvent(LocalEvent localEvent) {
+        int y = localEvent.getStartTime().getHour() * calendarPanel.getHourHeight();
         animateScrollTo(y, 400);  // 400ms smooth scroll
     }
 
@@ -261,11 +261,11 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         AddEventDialog dialog = new AddEventDialog(this);
         dialog.setVisible(true);
 
-        Event newEvent = dialog.getCreatedEvent();
-        if (newEvent != null) {
-            addEventToAllViews(newEvent);
-            eventListModel.addElement(newEvent);
-            scrollToEvent(newEvent);
+        LocalEvent newLocalEvent = dialog.getCreatedEvent();
+        if (newLocalEvent != null) {
+            addEventToAllViews(newLocalEvent);
+            eventListModel.addElement(newLocalEvent);
+            scrollToEvent(newLocalEvent);
         }
     }
 
@@ -274,45 +274,45 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         AddEventDialog dialog = new AddEventDialog(this, suggestedTime);
         dialog.setVisible(true);
 
-        Event newEvent = dialog.getCreatedEvent();
-        if (newEvent != null) {
-            addEventToAllViews(newEvent);
-            eventListModel.addElement(newEvent);
-            scrollToEvent(newEvent);
+        LocalEvent newLocalEvent = dialog.getCreatedEvent();
+        if (newLocalEvent != null) {
+            addEventToAllViews(newLocalEvent);
+            eventListModel.addElement(newLocalEvent);
+            scrollToEvent(newLocalEvent);
         }
     }
 
     @Override
-    public void onEdit(Event event) {
-        AddEventDialog dialog = new AddEventDialog(this, event);
+    public void onEdit(LocalEvent localEvent) {
+        AddEventDialog dialog = new AddEventDialog(this, localEvent);
         dialog.setVisible(true);
 
-        Event updated = dialog.getCreatedEvent();
+        LocalEvent updated = dialog.getCreatedEvent();
         if (updated != null) {
-            updateEventInAllViews(event, updated);
-            updateEventInList(event, updated);
+            updateEventInAllViews(localEvent, updated);
+            updateEventInList(localEvent, updated);
             scrollToEvent(updated);
         }
     }
 
     @Override
-    public void onDelete(Event event) {
+    public void onDelete(LocalEvent localEvent) {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Are you sure you want to delete this event?",
                 "Confirm Delete", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            removeEventFromAllViews(event);
-            eventListModel.removeElement(event);
+            removeEventFromAllViews(localEvent);
+            eventListModel.removeElement(localEvent);
         }
     }
 
     @Override
-    public void onEventSelected(Event event) {
-        if (event != null) {
-            System.out.println("Selected: " + event.getTitle());
-            eventList.setSelectedValue(event, true);
-            scrollToEvent(event);
+    public void onEventSelected(LocalEvent localEvent) {
+        if (localEvent != null) {
+            System.out.println("Selected: " + localEvent.getTitle());
+            eventList.setSelectedValue(localEvent, true);
+            scrollToEvent(localEvent);
         }
     }
 
@@ -336,29 +336,29 @@ public class MainFrame extends JFrame implements CalendarActionListener {
         scrollPane.setViewportView(monthlyCalendarPanel);
     }
 
-    private void addEventToAllViews(Event event) {
-        calendarPanel.addEvent(event);
+    private void addEventToAllViews(LocalEvent localEvent) {
+        calendarPanel.addEvent(localEvent);
         weeklyCalendarPanel.setEvents(calendarPanel.getEvents());
         monthlyCalendarPanel.setEvents(calendarPanel.getEvents());
     }
 
-    private void updateEventInAllViews(Event oldEvent, Event newEvent) {
-        calendarPanel.removeEvent(oldEvent);
-        calendarPanel.addEvent(newEvent);
+    private void updateEventInAllViews(LocalEvent oldLocalEvent, LocalEvent newLocalEvent) {
+        calendarPanel.removeEvent(oldLocalEvent);
+        calendarPanel.addEvent(newLocalEvent);
         weeklyCalendarPanel.setEvents(calendarPanel.getEvents());
         monthlyCalendarPanel.setEvents(calendarPanel.getEvents());
     }
 
-    private void updateEventInList(Event oldEvent, Event newEvent) {
-        int index = eventListModel.indexOf(oldEvent);
+    private void updateEventInList(LocalEvent oldLocalEvent, LocalEvent newLocalEvent) {
+        int index = eventListModel.indexOf(oldLocalEvent);
         if (index >= 0) {
-            eventListModel.set(index, newEvent);
+            eventListModel.set(index, newLocalEvent);
         }
     }
 
 
-    private void removeEventFromAllViews(Event event) {
-        calendarPanel.removeEvent(event);
+    private void removeEventFromAllViews(LocalEvent localEvent) {
+        calendarPanel.removeEvent(localEvent);
         weeklyCalendarPanel.setEvents(calendarPanel.getEvents());
         monthlyCalendarPanel.setEvents(calendarPanel.getEvents());
     }

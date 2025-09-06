@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-public class Event implements Serializable {
+public class LocalEvent implements Serializable {
     private static final long serialVersionUID = 1L;
     private UUID id;
     private String title;
@@ -21,11 +21,11 @@ public class Event implements Serializable {
     private List<String> attendees;
 
     //no arg constructor for serialization frameworks
-    public Event() {
+    public LocalEvent() {
         this.id = UUID.randomUUID();
     }
     //constructor
-    public Event(String title, LocalDateTime start, LocalDateTime end, String notes) {
+    public LocalEvent(String title, LocalDateTime start, LocalDateTime end, String notes) {
         this.title = title;
         this.startDateTime = start;
         this.endDateTime = end;
@@ -81,7 +81,7 @@ public class Event implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Event other = (Event) obj;
+        LocalEvent other = (LocalEvent) obj;
         return id.equals(other.id);
     }
 

@@ -1,7 +1,7 @@
 package ui;
 
 
-import model.Event;
+import model.LocalEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,12 +13,12 @@ import java.time.YearMonth;
 import java.util.List;
 
 public class CalendarGridPanel extends JPanel {
-    private List<Event> events;
+    private List<LocalEvent> localEvents;
     private YearMonth currentMonth;
     private CalendarActionListener listener;
 
-    public CalendarGridPanel(List<Event> events) {
-        this.events = events;
+    public CalendarGridPanel(List<LocalEvent> localEvents) {
+        this.localEvents = localEvents;
         this.currentMonth = YearMonth.now();
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(800, 600));
@@ -35,8 +35,8 @@ public class CalendarGridPanel extends JPanel {
         this.listener = listener;
     }
 
-    public void setEvents(List<Event> events) {
-        this.events = events;
+    public void setEvents(List<LocalEvent> localEvents) {
+        this.localEvents = localEvents;
         repaint();
     }
 
@@ -60,7 +60,7 @@ public class CalendarGridPanel extends JPanel {
         LocalDate clickedDate = currentMonth.atDay(dayIndex);
         LocalDateTime clickedDateTime = clickedDate.atTime(9, 0);  // default 9am
 
-        Event clickedEvent = getEventAt(e.getPoint(), clickedDate);
+        LocalEvent clickedEvent = getEventAt(e.getPoint(), clickedDate);
 
         if (SwingUtilities.isRightMouseButton(e)) {
             showContextMenu(e.getX(), e.getY(), clickedDateTime, clickedEvent);
@@ -73,15 +73,15 @@ public class CalendarGridPanel extends JPanel {
         }
     }
 
-    private void showContextMenu(int x, int y, LocalDateTime dateTime, Event event) {
+    private void showContextMenu(int x, int y, LocalDateTime dateTime, LocalEvent localEvent) {
         JPopupMenu menu = new JPopupMenu();
 
-        if (event != null) {
+        if (localEvent != null) {
             JMenuItem editItem = new JMenuItem("Edit");
-            editItem.addActionListener(e -> listener.onEdit(event));
+            editItem.addActionListener(e -> listener.onEdit(localEvent));
 
             JMenuItem deleteItem = new JMenuItem("Delete");
-            deleteItem.addActionListener(e -> listener.onDelete(event));
+            deleteItem.addActionListener(e -> listener.onDelete(localEvent));
 
             menu.add(editItem);
             menu.add(deleteItem);
@@ -94,9 +94,9 @@ public class CalendarGridPanel extends JPanel {
         menu.show(this, x, y);
     }
 
-    private Event getEventAt(Point point, LocalDate date) {
+    private LocalEvent getEventAt(Point point, LocalDate date) {
         // You could improve this by calculating exact cell & event bounds.
-        return events.stream()
+        return localEvents.stream()
                 .filter(e -> e.getStartDateTime().toLocalDate().equals(date))
                 .findFirst()
                 .orElse(null);
@@ -154,12 +154,12 @@ public class CalendarGridPanel extends JPanel {
                     g2.drawString(Integer.toString(dayCounter), cellX + 5, cellY + 15);
 
                     // Draw events for the day
-                    List<Event> dayEvents = events.stream()
+                    List<LocalEvent> dayEvents = localEvents.stream()
                             .filter(e -> e.getStartDateTime().toLocalDate().equals(date))
                             .toList();
 
                     int eventYOffset = 30;
-                    for (Event e : dayEvents) {
+                    for (LocalEvent e : dayEvents) {
                         g2.setColor(new Color(135, 206, 250));
                         g2.fillRoundRect(cellX + 5, cellY + eventYOffset - 10, cellWidth - 10, 18, 5, 5);
 

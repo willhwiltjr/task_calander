@@ -1,6 +1,6 @@
 package ui;
 
-import model.Event;
+import model.LocalEvent;
 
 import java.time.LocalDateTime;
 
@@ -13,13 +13,13 @@ public interface CalendarActionListener {
     void onAdd(LocalDateTime suggestedTime);
 
     // Edit an existing event
-    void onEdit(Event event);
+    void onEdit(LocalEvent localEvent);
 
     // Delete an existing event
-    void onDelete(Event event);
+    void onDelete(LocalEvent localEvent);
 
     // An event was selected (click or focus)
-    void onEventSelected(Event event);
+    void onEventSelected(LocalEvent localEvent);
 
     // Optional: For future navigation features
     void onDateSelected(LocalDateTime dateTime);

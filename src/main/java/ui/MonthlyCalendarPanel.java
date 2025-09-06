@@ -1,6 +1,6 @@
 package ui;
 
-import model.Event;
+import model.LocalEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +11,7 @@ public class MonthlyCalendarPanel extends JPanel {
     private final CalendarGridPanel calendarGridPanel;
     private final JLabel monthLabel;
 
-    public MonthlyCalendarPanel(List<Event> events) {
+    public MonthlyCalendarPanel(List<LocalEvent> localEvents) {
         setLayout(new BorderLayout());
 
         // Header with month name
@@ -20,14 +20,14 @@ public class MonthlyCalendarPanel extends JPanel {
         add(monthLabel, BorderLayout.NORTH);
 
         // Calendar grid
-        calendarGridPanel = new CalendarGridPanel(events);
+        calendarGridPanel = new CalendarGridPanel(localEvents);
         add(calendarGridPanel, BorderLayout.CENTER);
 
         setMonth(YearMonth.now());
     }
 
-    public void setEvents(List<Event> events) {
-        calendarGridPanel.setEvents(events);
+    public void setEvents(List<LocalEvent> localEvents) {
+        calendarGridPanel.setEvents(localEvents);
     }
 
     public void setMonth(YearMonth month) {

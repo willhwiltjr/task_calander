@@ -29,8 +29,8 @@ public class EventValidator {
     }
 
     // Optional: You could later add overloaded methods to validate full Event objects
-    public static String validate(Event event) {
-        return validate(event.getTitle(), event.getStartDateTime(), event.getEndDateTime());
+    public static String validate(LocalEvent localEvent) {
+        return validate(localEvent.getTitle(), localEvent.getStartDateTime(), localEvent.getEndDateTime());
     }
 }
 
