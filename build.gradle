@@ -15,7 +15,7 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url 'https://maven.google.com' }  // Add this line
+    maven { url = uri('https://maven.google.com') }  // Add this line
 }
 
 
@@ -25,4 +25,5 @@ dependencies {
     implementation 'com.google.apis:google-api-services-calendar:v3-rev411-1.25.0'
     implementation 'com.google.code.gson:gson:2.10.1'
 }
+
 

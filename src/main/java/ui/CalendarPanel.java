@@ -6,11 +6,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class CalendarPanel extends JPanel {
+    private LocalDate currentDate = LocalDate.now();
     private List<LocalEvent> localEvents;
     private int HOUR_HEIGHT = 60;  // taller = more space per hour
     private static final int LEFT_MARGIN = 60;  // for time labels
@@ -22,6 +24,10 @@ public class CalendarPanel extends JPanel {
 
     public void setCalendarActionListener(CalendarActionListener listener) {
         this.eventListener = listener;
+    }
+    public void setCurrentDate(LocalDate date){
+        this.currentDate = date;
+        repaint();
     }
     private JPopupMenu createContextMenu(LocalEvent localEvent) {
         JPopupMenu menu = new JPopupMenu();
@@ -144,7 +150,10 @@ public class CalendarPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Step 1: Sort events by start time
-        localEvents.sort(Comparator.comparing(LocalEvent::getStartTime));
+        List<LocalEvent> filteredEvents = localEvents.stream()
+                .filter(e -> e.getStartDateTime().toLocalDate().equals(currentDate))
+                .sorted(Comparator.comparing(LocalEvent::getStartTime))
+                .toList();
 
         List<List<LocalEvent>> overlappingGroups = groupOverlappingEvents(localEvents);
 

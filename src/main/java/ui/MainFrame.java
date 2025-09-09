@@ -3,6 +3,7 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -322,7 +323,10 @@ public class MainFrame extends JFrame implements CalendarActionListener {
     }
 
     //switch view to daily view hook up to the daily view button
-    private void showDailyView() {  scrollPane.setViewportView(calendarPanel);  }
+    private void showDailyView() {
+        scrollPane.setViewportView(calendarPanel);
+        calendarPanel.setCurrentDate(LocalDate.now());
+    }
 
     //switch view to weekly view hook up to weekly view button
     private void showWeeklyView() {
