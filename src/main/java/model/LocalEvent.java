@@ -30,6 +30,7 @@ public class LocalEvent implements Serializable {
         this.startDateTime = start;
         this.endDateTime = end;
         this.description = notes;
+        this.id = UUID.randomUUID();
     }
 
     //getters
@@ -53,6 +54,10 @@ public class LocalEvent implements Serializable {
     public LocalDateTime getEndDateTime() { return this.endDateTime; }
     //get dayOfWeek
     public DayOfWeek getDayOfWeek() { return this.startDateTime.getDayOfWeek(); }
+    //get location
+    public String getLocation(){ return this.location; }
+    //get attendees
+    public List<String> getAttendees() { return this.attendees; }
 
     //setters
     //set title
@@ -65,6 +70,10 @@ public class LocalEvent implements Serializable {
     public void setDescription(String description) { this.description = description; }
     //set uuid
     public void setId(UUID id) { this.id = id; }
+    //set location
+    public void setLocation(String s) { this.location=s; }
+    //set attendees
+    public void setAttendees(List<String> attendees) { this.attendees=attendees; }
 
     public boolean isValid() {
         return startDateTime != null &&
@@ -74,8 +83,10 @@ public class LocalEvent implements Serializable {
 
     @Override
     public String toString() {
-        return title + " (" + startDateTime.toLocalTime() + " - " + endDateTime.toLocalTime() + ")";
+        String time = (startDateTime != null) ? startDateTime.toLocalTime().toString() : "Unknown time";
+        return time + " - " + title;
     }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -89,6 +100,7 @@ public class LocalEvent implements Serializable {
     public int hashCode() {
         return id.hashCode();
     }
+
 
 
 }
