@@ -55,9 +55,10 @@ public class MainFrame extends JFrame implements CalendarActionListener, ButtonP
 //        DirectoryManager.clearSavedDirectory();
 
         // Sidebar with buttons
-        JPanel ButtonBox = new JPanel((LayoutManager) ButtonPanel);
+        JPanel ButtonBox = new JPanel();
         ButtonPanel = new setupButtons(ButtonBox);
-        ButtonPanel.setButtonPanelListener();
+        ButtonPanel.setButtonPanelListener(this);
+
 
 
 
